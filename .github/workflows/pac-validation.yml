@@ -1,0 +1,26 @@
+name: Shift-Left Policy-as-Code Benchmark
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  kyverno-static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu z repozytorium
+        uses: actions/checkout@v4
+
+      - name: Instalacja Kyverno CLI
+        run: |
+          curl -sL https://github.com/kyverno/kyverno/releases/download/v1.12.0/kyverno-cli_v1.12.0_linux_x86_64.tar.gz | tar -xz
+          sudo mv kyverno /usr/local/bin/
+          kyverno version
+
+      - name: Test 1 - Walidacja poprawnego manifestu (deployment-good.yaml)
+        run: |
+          time kyverno apply policies/kyverno-ci-policies.yaml --resource k8s/deployment-good.yaml
+
+      - name: Test 2 - Walidacja blednego manifestu (deployment-bad.yaml)
+        run: |
+          time kyverno apply policies/kyverno-ci-policies.yaml --resource k8s/deployment-bad.yaml

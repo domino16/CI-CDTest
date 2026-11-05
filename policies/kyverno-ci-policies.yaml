@@ -1,0 +1,48 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: ci-baseline-security
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: disallow-privileged
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Kontenery uprzywilejowane sa zabronione."
+        pattern:
+          spec:
+            containers:
+              - =(securityContext):
+                  =(privileged): "false"
+    - name: require-limits
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Wymagane sa limity CPU oraz RAM."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"
+    - name: require-non-root
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Wymagane jest ustawienie runAsNonRoot: true."
+        anyPattern:
+          - spec:
+              securityContext:
+                runAsNonRoot: true
+          - spec:
+              containers:
+                - securityContext:
+                    runAsNonRoot: true

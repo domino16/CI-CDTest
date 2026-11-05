@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-devsecops-app
+  namespace: badania-pac
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      hostNetwork: true
+      containers:
+        - name: spring-backend
+          image: eclipse-temurin:17-jre-alpine
+          securityContext:
+            privileged: true
+            runAsNonRoot: false

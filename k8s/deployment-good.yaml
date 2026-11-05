@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-devsecops-app
+  namespace: badania-pac
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: spring-backend
+          image: docker.io/library/eclipse-temurin:17-jre-alpine
+          command: ["sh", "-c", "sleep 3600"]
+          securityContext:
+            privileged: false
+            runAsNonRoot: true
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
